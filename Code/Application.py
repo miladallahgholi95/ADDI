@@ -132,8 +132,8 @@ def Recommendation():
     path = 'Drug_Cluster.csv'
     file = pd.read_csv(path)
     for index,row in file.iterrows():
-        cluster = row['Cluster']
-        name = row['name']
+        cluster = row['Cluster Number']
+        name = row['Drug Name']
         drug_cluster_list [name] = cluster
         if cluster not in cluster_drug_list:
             cluster_drug_list[cluster] = [name]
@@ -154,46 +154,50 @@ def Recommendation():
 
 
 
-    file_result = open("Recommendation_Result_1.txt",'w')
+    file_result = open("Recommendation_Result_new.txt",'w')
+    file_result.write("Drug_1,Drug_2,Drug_1_new,Drug_2_new,Drug_1_new_Similarity,Drug_2_new_Similarity")
     print(drug_relation_list.__len__())
     k= 0
     for item in drug_relation_list:
         k += 1
         print(k)
-        if k >=174:
+        drug_a = item[0]
+        drug_b = item[1]
 
-            drug_a = item[0]
-            drug_b = item[1]
+        drug_a_cluster = drug_cluster_list[drug_a]
+        drug_b_cluster = drug_cluster_list[drug_b]
 
-            drug_a_cluster = drug_cluster_list[drug_a]
-            drug_b_cluster = drug_cluster_list[drug_b]
+        a_max_similar_number = 0
+        a_max_similar_name = ''
+        print("a")
+        for drug in cluster_drug_list[drug_a_cluster]:
+            if drug != drug_b and drug != drug_a and [drug_b,drug] not in drug_relation_list and [drug,drug_b] not in drug_relation_list:
+                similarity = model.similarity(drug, drug_a)
+                if similarity > a_max_similar_number and similarity >= 0.7 and ddi_checker(drug, drug_b) not in Negative_Label_txt:
+                    a_max_similar_number = similarity
+                    a_max_similar_name = drug
 
-            a_max_similar_number = 0
-            a_max_similar_name = ''
-            print("a")
-            for drug in cluster_drug_list[drug_a_cluster]:
-                if drug != drug_b and drug != drug_a and [drug_b,drug] not in drug_relation_list and [drug,drug_b] not in drug_relation_list:
-                    similarity = model.similarity(drug, drug_a)
-                    if similarity > a_max_similar_number and similarity >= 0.7 and ddi_checker(drug, drug_b) not in Negative_Label_txt:
-                        a_max_similar_number = similarity
-                        a_max_similar_name = drug
-
-            b_max_similar_number = 0
-            b_max_similar_name = ''
-            print("b")
-            for drug in cluster_drug_list[drug_b_cluster]:
-                if drug != drug_b and drug != drug_a and [drug_a,drug] not in drug_relation_list and [drug,drug_a] not in drug_relation_list:
-                    similarity = model.similarity(drug,drug_b)
-                    if similarity > b_max_similar_number and similarity >= 0.7 and ddi_checker(drug, drug_a) not in Negative_Label_txt:
-                        b_max_similar_number = similarity
-                        b_max_similar_name = drug
+        b_max_similar_number = 0
+        b_max_similar_name = ''
+        print("b")
+        for drug in cluster_drug_list[drug_b_cluster]:
+            if drug != drug_b and drug != drug_a and [drug_a,drug] not in drug_relation_list and [drug,drug_a] not in drug_relation_list:
+                similarity = model.similarity(drug,drug_b)
+                if similarity > b_max_similar_number and similarity >= 0.7 and ddi_checker(drug, drug_a) not in Negative_Label_txt:
+                    b_max_similar_number = similarity
+                    b_max_similar_name = drug
 
 
-            if a_max_similar_number >= b_max_similar_number and a_max_similar_number >= 0.7:
-                file_result.write(drug_a + "," + drug_b + "," + a_max_similar_name + "," + drug_b + "," + str(round(a_max_similar_number,3)) + "\n")
-                print("kkk ", k)
-            elif a_max_similar_number < b_max_similar_number and b_max_similar_number >= 0.7:
-                file_result.write(drug_a + "," + drug_b + "," + drug_a + "," + b_max_similar_name + "," + str(round(b_max_similar_number,3)) + "\n")
-                print("kkk ", k)
+        # if a_max_similar_number >= b_max_similar_number and a_max_similar_number >= 0.7:
+        #     file_result.write(drug_a + "," + drug_b + "," + a_max_similar_name + "," + drug_b + "," + str(round(a_max_similar_number,3)) + "\n")
+        # elif a_max_similar_number < b_max_similar_number and b_max_similar_number >= 0.7:
+        #     file_result.write(drug_a + "," + drug_b + "," + drug_a + "," + b_max_similar_name + "," + str(round(b_max_similar_number,3)) + "\n")
+
+        file_result.write("\n"+drug_a + "," +
+                          drug_b + "," +
+                          a_max_similar_name + "," + b_max_similar_name + "," +
+                          str(round(a_max_similar_number, 3)) + "," +
+                           str(round(b_max_similar_number, 3)))
+
 
 Recommendation()
