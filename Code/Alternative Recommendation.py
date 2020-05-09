@@ -161,6 +161,8 @@ def Recommendation():
     for item in drug_relation_list:
         k += 1
         print(k)
+        if k > 10:
+            break
         drug_a = item[0]
         drug_b = item[1]
 
@@ -192,12 +194,12 @@ def Recommendation():
         #     file_result.write(drug_a + "," + drug_b + "," + a_max_similar_name + "," + drug_b + "," + str(round(a_max_similar_number,3)) + "\n")
         # elif a_max_similar_number < b_max_similar_number and b_max_similar_number >= 0.7:
         #     file_result.write(drug_a + "," + drug_b + "," + drug_a + "," + b_max_similar_name + "," + str(round(b_max_similar_number,3)) + "\n")
-
-        file_result.write("\n"+drug_a + "," +
-                          drug_b + "," +
-                          a_max_similar_name + "," + b_max_similar_name + "," +
-                          str(round(a_max_similar_number, 3)) + "," +
-                           str(round(b_max_similar_number, 3)))
+        if ddi_checker(a_max_similar_name, b_max_similar_name) not in Negative_Label_txt:
+            print(k)
+            file_result.write("\n"+drug_a + "," + drug_b + "," +
+                              a_max_similar_name + "," + b_max_similar_name + "," +
+                              str(round(a_max_similar_number, 3)) + "," +
+                              str(round(b_max_similar_number, 3)))
 
 
 Recommendation()
